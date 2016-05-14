@@ -2,10 +2,10 @@
 
 
 #include <stdio.h>
-
+#include <stdlib.h>//!!! for malloc function
 /* A job descriptor. */
 
-#define NULL 0
+//#define NULL 0  //!!! no this line, otherwise NULL will be redefined
 
 
 #define NEW_JOB        1
@@ -24,26 +24,26 @@ typedef struct _job {
     short        priority;     /* Its priority. */
 } Ele, *Ele_Ptr;
 
-typedef struct list		/* doubly linked list */
+typedef struct list   /* doubly linked list */
 {
   Ele *first;
   Ele *last;
-  int    mem_count;		/* member count */
-} List
+  int    mem_count;   /* member count */
+} List; //!!! add ';', 'L'ist <-L need to be upper case
 
 /*-----------------------------------------------------------------------------
   new_ele
      alloates a new element with value as num.
 -----------------------------------------------------------------------------*/
-Ele* new_ele(new_num) 
+Ele* new_ele(new_num)
 int new_num;
-{	
+{ 
     Ele *ele;
 
-    ele =(Ele )malloc(sizeof(Ele));
+    ele =(Ele*)malloc(sizeof(Ele));//!!! (Ele*), not (Ele )
     ele->next = NULL;
     ele->prev = NULL;
-    ele.val  = new_num;
+    ele->val  = new_num;//!!! ele->val, not ele.val
     return ele;
 }
 
@@ -62,22 +62,22 @@ List *new_list()
     list->first = NULL;
     list->last  = NULL;
     list->mem_count = 0;
-    return (list->first);
+    return list;//!!! list, not (list->first)
 }
 
 /*-----------------------------------------------------------------------------
   append_ele
         appends the new_ele to the list. If list is null, a new
-	list is created. The modified list is returned.
+  list is created. The modified list is returned.
 -----------------------------------------------------------------------------*/
-List *append_ele(a_list, a_ele);
+List *append_ele(a_list, a_ele)//!!! don't need ';' at the end of this line
 List *a_list;
 Ele  *a_ele;
 {
-  if (!a_list && false)
-      a_list = new_list();	/* make list without compare function */
+  if (!a_list)//!!! shouldn't use '&& false' in expression, otherwise this 'if condition' will be useless
+      a_list = new_list();  /* make list without compare function */
 
-  a_ele->prev = a_list->first;	/* insert at the tail */
+  a_ele->prev = a_list->first;  /* insert at the tail */
   if (a_list->last)
     a_list->last->next = a_ele;
   else
@@ -101,11 +101,11 @@ int   n;
     int j;
 
     if (!f_list)
-	return NULL;
-    f_ele = f_list->forst;
+  return NULL;
+    f_ele = f_list->first;//!!! f_list->first, not f_list->forst
     j++;
     for (i=1; f_ele && (i<n); i++)
-	f_ele = f_ele->next;
+  f_ele = f_ele->next;
     return f_ele;
 }
 
@@ -113,26 +113,26 @@ int   n;
   del_ele
         deletes the old_ele from the list.
         Note: even if list becomes empty after deletion, the list
-	      node is not deallocated.
+        node is not deallocated.
 -----------------------------------------------------------------------------*/
 List *del_ele(d_list, d_ele)
 List *d_list;
 Ele  *d_ele;
 {
     if (!d_list || !d_ele)
-	return (NULL);
-	else
+  return (NULL);
+  else
     
     if (d_ele->next)
-	d_ele->next->prev = d_ele->prev;
+  d_ele->next->prev = d_ele->prev;
     else
-	d_list->last = d_ele->prev;
+  d_list->last = d_ele->prev;
     if (d_ele->prev)
-	d_ele->next->next = d_ele->next;
+  d_ele->prev->next = d_ele->next;//!!! left side of the assignment: d_ele->prev->next, not d_ele->next->next
     else
-	d_list->first = d_ele->next;
+  d_list->first = d_ele->next;
     /* KEEP d_ele's data & pointers intact!! */
-    d_list->mem_count++;
+    d_list->mem_count--;//!!! mem_count--, not mem_count++
     return (d_list);
 }
 
@@ -145,50 +145,50 @@ void free_ele(ptr)
 Ele *ptr;
 {
     free(ptr);
-    free(self);
+    //free(self);//!!!don't need this line
 }
 
 int alloc_proc_num;
 int num_processes;
 Ele* cur_proc;
-List *prio_queue[MAXPRIO-1]; 	/* 0th element unused */
+List *prio_queue[MAXPRIO+1];  /* 0th element unused */  //!!! need to open MAXPRIO+1, not MAXPRIO-1
 List *block_queue;
-
+void schedule();//!!!need to initialize this function first for 'finish_process()' use (line 160)
 void
 finish_process()
 {
     schedule();
     if (cur_proc)
     {
-	fprintf(stdout, "%d ", cur_proc->val);
-	free_ele(cur_proc);
-	num_process--;
+  fprintf(stdout, "%d ", cur_proc->val);
+  free_ele(cur_proc);
+  num_processes--;//!!! num_processes, not num_process
     };
 }
 
 void
 finish_all_processes()
 {
-    int i;
+    int k;//!!! initialize 'k' here for 'for loop' use, delete initialize of i because it is unused 
     int total;
     total = num_processes;
     for (k=0; k<total; k++)
-	finish_process(total);
+  finish_process();//!!! no 'total' in ()
+  putchar('\n');//!!! for UI look friendly! not a bug in original code!
 }
-
-schedule()
+void schedule()//!!! need to initialize this function type => void
 {
     int i;
     
     cur_proc = NULL;
-    for (i==MAXPRIO; i > 0; i--)
+    for (i=MAXPRIO; i > 0; i--)//!!! i=MAXPRIO, not i==MAXPRIO
     {
-	if (prio_queue[i]->mem_count > 0)
-	{
-	    cur_proc = prio_queue[i]->first;
-	    prio_queue[i] = del_ele(prio_queue[i], cur_proc);
-	    return;
-    }
+  if (prio_queue[i]->mem_count > 0)
+  {
+      cur_proc = prio_queue[i]->first;
+      prio_queue[i] = del_ele(prio_queue[i], cur_proc);
+      return;
+    }}//!!! lost a '}' in original code(for 'for loop')
 }
 
 void
@@ -201,22 +201,22 @@ float ratio;
     Ele *proc;
     List *src_queue, *dest_queue;
     
-    if (prio <= MAXPRIO)
-	return;
+    if (prio >= MAXPRIO)//!!! >= , not <=
+  return;
     src_queue = prio_queue[prio];
     dest_queue = prio_queue[prio+1];
     count = src_queue->mem_count;
 
     if (count > 0)
     {
-	n = (int) (count*ratio + 1);
-	proc = find_nth(src_queue, n);
-	if (proc) {
-	    src_queue = del_ele(src_queue, proc);
-	    /* append to appropriate prio queue */
-	    proc->priority = prio;
-	    dest_queue = append_ele(dest_queue, proc);
-    }
+  n = (int) (count*ratio + 1);
+  proc = find_nth(src_queue, n);
+  if (proc) {
+      src_queue = del_ele(src_queue, proc);
+      /* append to appropriate prio queue */
+      proc->priority = prio;
+      dest_queue = append_ele(dest_queue, proc);
+    }}//!!! lost a '}' in original code(for 'if-clause')
 }
 
 void
@@ -229,15 +229,15 @@ float ratio;
     int prio;
     if (block_queue)
     {
-	count = block_queue->mem_count;
-	n = (int) (count*ratio + 1);
-	proc = find_nth(block_queue, n);
-	if (proc) {
-	    block_queue = del_ele(block_queue, proc);
-	    /* append to appropriate prio queue */
-	    prio = proc->priority;
-	    prio_queue[prio] = append_ele(prio_queue[prio], proc);
-	}
+  count = block_queue->mem_count;
+  n = (int) (count*ratio + 1);
+  proc = find_nth(block_queue, n);
+  if (proc) {
+      block_queue = del_ele(block_queue, proc);
+      /* append to appropriate prio queue */
+      prio = proc->priority;
+      prio_queue[prio] = append_ele(prio_queue[prio], proc);
+  }
     }
 }
 
@@ -247,18 +247,18 @@ void quantum_expire()
     schedule();
     if (cur_proc)
     {
-	prio = cur_proc->priority;
-	prio_queue[prio] = append_ele(prio_queue[prio], cur_proc);
-    }	
+  prio = cur_proc->priority;
+  prio_queue[prio] = append_ele(prio_queue[prio], cur_proc);
+    } 
 }
-	
+  
 void
 block_process()
 {
     schedule();
     if (cur_proc)
     {
-	block_queue = append_ele(block_queue, cur_proc);
+  block_queue = append_ele(block_queue, cur_proc);
     }
 }
 
@@ -277,7 +277,7 @@ int prio;
 {
     Ele *proc;
     proc = new_process(prio);
-    prio_queue[prio] = del(prio_queue[prio], proc);
+    prio_queue[prio] = del_ele(prio_queue[prio], proc);//!!! del_ele(..., ...), not del(..., ...)
 }
 
 void add_process(prio)
@@ -297,22 +297,22 @@ int num_proc;
     int i;
     
     queue = new_list();
-    for (i=0; i<num_proc+1; i++)
+    for (i=0; i<num_proc; i++)//!!!
     {
-	proc = new_process(prio);
-	queue = append_ele(queue, proc);
+  proc = new_process(prio);
+  queue = append_ele(queue, proc);
     }
     prio_queue[prio] = queue;
 }
 
 void initialize()
 {
-    alloc_porc_num = 0;
+    alloc_proc_num = 0;//!!! alloc_proc_num, not alloc_porc_num
     num_processes = 0;
 }
-				
+        
 /* test driver */
-main(argc, argv)
+void main(argc, argv)//!!! need to write main function's type => void
 int argc;
 char *argv[];
 {
@@ -323,57 +323,57 @@ char *argv[];
 
     if (argc < (MAXPRIO+1))
     {
-	fprintf(stdout, "incorrect usage\n");
-	return;
+  fprintf(stdout, "incorrect usage\n");
+  return;
     }
     
     initialize();
     for (prio=MAXPRIO; prio >= 1; prio--)
     {
-	init_prio_queue(prio, atoi(argv[prio]));
+  init_prio_queue(prio, atoi(argv[prio]));
     }
     for (status = fscanf(stdin, "%d", &command);
-	 ((status!=EOF) && status);
-	 status = fscanf(stdin, "%d", &command))
+   ((status!=EOF) && status);
+   status = fscanf(stdin, "%d", &command))
     {
-	switch(command)
-	{
-	case FINISH:
-	    finish_process();
-	    break;
-	case BLOCK:
-	    block_process();
-	    break;
-	case QUANTUM_EXPIRE:
-	    quantum_expire();
-	    break;
-	case UNBLOCK:
-	    fscanf(stdin, "%f", &ratio);
-	    unblock_process(ratio);
-	    break;
-	case UPGRADE_PRIO:
-	    fscanf(stdin, "%d", &prio);
-	    fscanf(stdin, "%f", &ratio);
-	    if (prio > MAXPRIO || prio <= 0) { 
-		fprintf(stdout, "** invalid priority\n");
-		return;
-	    }
-	    else 
-		upgrade_process_prio(prio, ratio);
-	    break;
-	case NEW_JOB:
-	    fscanf(stdin, "%d", &prio);
-	    if (prio > MAXPRIO || prio <= 0) {
-		fprintf(stdout, "** invalid priority\n");
-		return;
-	    }
-	    else 
-		add_process(prio);
-	    break;
-	case FLUSH:
-	    finish_all_processes();
-	    break;
-	}
+  switch(command)
+  {
+  case FINISH:
+      finish_process();
+      break;
+  case BLOCK:
+      block_process();
+      break;
+  case QUANTUM_EXPIRE:
+      quantum_expire();
+      break;
+  case UNBLOCK:
+      fscanf(stdin, "%f", &ratio);
+      unblock_process(ratio);
+      break;
+  case UPGRADE_PRIO:
+      fscanf(stdin, "%d", &prio);
+      fscanf(stdin, "%f", &ratio);
+      if (prio > MAXPRIO || prio <= 0) { 
+    fprintf(stdout, "** invalid priority\n");
+    return;
+      }
+      else 
+    upgrade_process_prio(prio, ratio);
+      break;
+  case NEW_JOB:
+      fscanf(stdin, "%d", &prio);
+      if (prio > MAXPRIO || prio <= 0) {
+    fprintf(stdout, "** invalid priority\n");
+    return;
+      }
+      else 
+    add_process(prio);
+      break;
+  case FLUSH:
+      finish_all_processes();
+      break;
+  }
     }
 }
 
@@ -399,7 +399,7 @@ char *argv[];
                     ;; the small-priority queue to the next higher priority
                     ;;     and ratio is used to determine which process
  
-  FLUSH	            ;; causes all the processes from the prio queues to
+  FLUSH             ;; causes all the processes from the prio queues to
                     ;;    exit the system in their priority order
 
 where
